@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anxt Ai - Ultimate</title>
+
+  <!-- FontAwesome & Tailwind -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Particle Animation -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background: #0a0a0a;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .glass-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .glass-container:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .highlight {
+      color: #00ffcc;
+      font-weight: bold;
+    }
+
+    .pending {
+      color: #ff9800;
+      font-weight: bold;
+    }
+
+    .big {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .small {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .period-box {
+      background: linear-gradient(135deg, #00ffcc, #00bcd4);
+      padding: 10px 15px;
+      border-radius: 8px;
+      display: inline-block;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 188, 212, 0.8);
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .history-container {
+      max-height: 200px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #00ffcc #0a0a0a;
+    }
+
+    .history-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .history-container::-webkit-scrollbar-thumb {
+      background: #00ffcc;
+      border-radius: 6px;
+    }
+
+    .history-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 5px 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Particle Background -->
+  <div id="particles-js"></div>
+
+  <!-- Header -->
+  <header class="w-full text-center py-6">
+    <h1 class="text-3xl font-bold highlight">
+      <i class="fas fa-chart-line"></i> TEAM EARNING<span class="text-red-500">AI</span>
+    </h1>
+  </header>
+
+  <!-- Period & Timer -->
+  <div class="glass-container">
+    <h2 class="text-lg font-semibold">
+      <i class="fas fa-clock"></i> Current Period:
+    </h2>
+    <p id="period" class="period-box">Loading...</p>
+    <p class="text-xl mt-2">
+      <i class="fas fa-hourglass-half"></i>
+      <span id="timer">00:00</span>
+    </p>
+  </div>
+
+  <!-- Current Prediction -->
+  <div class="glass-container">
+    <h2 class="text-lg font-semibold">
+      <i class="fas fa-magic"></i> Prediction:
+    </h2>
+    <p id="prediction" class="pending text-lg">Pending...</p>
+    <p id="chance" class="text-gray-400 text-sm">Chance: --%</p>
+  </div>
+
+  <!-- Prediction History -->
+  <div class="glass-container">
+    <h2 class="text-lg font-semibold">
+      <i class="fas fa-history"></i> Last Predictions:
+    </h2>
+    <div class="history-container">
+      <ul id="historyList" class="text-gray-300 mt-2 space-y-2"></ul>
+    </div>
+  </div>
+
+  <script>
+    const predictionSequence = ["Big", "Small"];
+    let lastPeriod = null;
+
+    // Period & Timer
+    function updatePeriodAndTimer() {
+      const now = new Date();
+      const seconds = now.getUTCSeconds();
+      const remainingSeconds = 60 - seconds;
+      const totalMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+
+      // Generate Period Number
+      const periodNumber = `${now.getUTCFullYear()}${(now.getUTCMonth() + 1).toString().padStart(2, '0')}${now.getUTCDate().toString().padStart(2, '0')}1000${(10001 + totalMinutes)}`;
+      document.getElementById("period").textContent = periodNumber;
+      document.getElementById("timer").textContent = `00:${remainingSeconds.toString().padStart(2, '0')}`;
+
+      // When period changes, generate a new prediction
+      if (lastPeriod !== periodNumber) {
+        lastPeriod = periodNumber;
+        document.getElementById("prediction").textContent = "Pending...";
+        document.getElementById("prediction").className = "pending text-lg";
+        document.getElementById("chance").textContent = "Chance: --%";
+
+        setTimeout(() => {
+          generatePrediction(periodNumber);
+        }, 5000);
+      }
+    }
+
+    // Generate Prediction
+    function generatePrediction(periodNumber) {
+      const prediction = predictionSequence[Math.floor(Math.random() * predictionSequence.length)];
+      const randomChance = Math.floor(Math.random() * (95 - 65 + 1)) + 65;
+
+      document.getElementById("prediction").textContent = prediction;
+      document.getElementById("prediction").className = prediction === "Big" ? "big text-lg" : "small text-lg";
+      document.getElementById("chance").textContent = `Chance: ${randomChance}%`;
+
+      updateHistory(periodNumber, prediction, randomChance);
+    }
+
+    // Update History
+    function updateHistory(periodNumber, prediction, chance) {
+      const historyList = document.getElementById("historyList");
+      const historyEntry = document.createElement("li");
+      historyEntry.className = "history-item animate-fade-in";
+      historyEntry.innerHTML = `<strong>Period:</strong> ${periodNumber} - <strong>Prediction:</strong> ➢ ${prediction} (Chance: ${chance}%)`;
+      historyList.prepend(historyEntry);
+    }
+
+    // Initialize Timer
+    setInterval(updatePeriodAndTimer, 1000);
+
+    // Initialize Particle Animation
+    particlesJS("particles-js", { particles: { number: { value: 100 }, size: { value: 3 }, move: { speed: 2 } } });
+  </script>
+
+</body>
+</html>
